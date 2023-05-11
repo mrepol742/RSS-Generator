@@ -1,11 +1,16 @@
-# RSS-Fetcher
+# RSS-Generator
 
-Fetch RSS from the 3rd party services to your github repository.
+Automatically generate rss.xml for your site.
+
+## Requirements
+- https://jsoup.org/download
+- https://jar-download.com/artifacts/org.json
+
+## Todo
+Replace all necessary data such as file locations and domain name.
 
 ## Compile
 javac RSS.java
 
 ## Run
 java RSS
-
-Replace all info in .github/workflows/rss.yml with your repository info.

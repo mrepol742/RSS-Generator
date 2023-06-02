@@ -14,7 +14,7 @@ import org.jsoup.internal.*;
 import org.jsoup.nodes.*;
 import org.jsoup.parser.*;
 
-class RSS {
+class Main {
 
     private static List<Item> items = new ArrayList<>();
     private static JSONObject obj = new JSONObject();

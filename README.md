@@ -6,7 +6,7 @@ Automatically generate RSS for static websites.
 - maven
 - Java 8
 
-## Compile
+## Build
 ```
 mvn compile assembly:single
 ```

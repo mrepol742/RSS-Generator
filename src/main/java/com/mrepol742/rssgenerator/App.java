@@ -1,9 +1,16 @@
+package com.mrepol742.rssgenerator;
+
 import java.text.SimpleDateFormat;
 import java.io.*;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import java.nio.file.Paths;
+import java.nio.file.Files;
+
 
 import org.json.*;
 
@@ -14,41 +21,39 @@ import org.jsoup.internal.*;
 import org.jsoup.nodes.*;
 import org.jsoup.parser.*;
 
-class Main {
+public class App {
 
-    private static List<Item> items = new ArrayList<>();
-    private static JSONObject obj = new JSONObject();
-    private static SimpleDateFormat format =  new SimpleDateFormat("E, dd MMMM yyyy k:m:s z");
-    private static String header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:content=\"http://purl.org/rss/1.0/modules/content/\" xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\" xmlns:media=\"http://search.yahoo.com/mrss/\">\n<channel>\n";
-    private static String footer = "</channel>\n</rss>";
-    private static String body = "<item>\n" +
+    static List<Item> items = new ArrayList<>();
+    static JSONObject obj = new JSONObject();
+    static SimpleDateFormat format =  new SimpleDateFormat("E, dd MMMM yyyy k:m:s z");
+    static String header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:content=\"http://purl.org/rss/1.0/modules/content/\" xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\" xmlns:media=\"http://search.yahoo.com/mrss/\">\n<channel>\n";
+    static String footer = "</channel>\n</rss>";
+
+    static StringBuilder rss = new StringBuilder();
+    static Arg arg;
+    static boolean isHome = false;
+
+    public static void main(String[] args) throws IOException  {
+        if (args.length == 0) {
+            System.out.println("arguments:\n\t--domain [address]\n\t--publisher [name]\noptional:\n\t--projectFolder [location]");
+            return;
+        }
+        arg = resolveArguments(args);
+        rss.append(header);
+                find(new File(arg.getProjectFolder()), arg.getDomain());
+        for (Item item: items) {
+            rss.append(String.format("<item>\n" +
     "  <title>%1$s</title>\n" +
     "  <description>%2$s</description>\n" +
     "  <link>%3$s</link>\n" + 
     "  <creator>%4$s</creator>\n" +
-    "  <content medium=\"image\" url=\"%5$s\"/>\n";
-
-    private static StringBuilder rss = new StringBuilder();
-    private static String url;
-    private static String domain;
-    private static boolean isHome = false;
-
-    public static void main(String[] args) {
-        //String domain = args[0];
-        //String url = args[1];
-       
-        url = "/home/alexaguno/Documents/mrepol742.github.io";
-        domain = "https://mrepol742.github.io";
-
-        rss.append(header);
-                find(new File(url), domain);
-        for (Item item: items) {
-            rss.append(String.format(body, item.title, item.description, item.link, "<![CDATA[ Melvin Jones Repol ]]>", item.medium_url));
+    "  <content medium=\"image\" url=\"%5$s\"/>\n", item.title, item.description, item.link, "<![CDATA[ " + arg.getPublisher() + " ]]>", item.medium_url));
             rss.append("</item>\n");
         }
         rss.append(footer);
-        if (write(new File(url + "/rss.xml"), rss.toString(), false)) {
-            System.out.println("\nRSS generated for " + domain);
+        Files.createDirectories(Paths.get(arg.getProjectFolder() + "/rss"));
+        if (write(new File(arg.getProjectFolder() + arg.getOutputFile()), rss.toString(), false)) {
+            System.out.println("\nRSS generated for " + arg.getDomain());
         } else {
             System.out.println("\nFailed to generate rss.");
         }
@@ -85,10 +90,10 @@ class Main {
             return;
         }
         if (file.isDirectory() && !isHome) {
-            String[] metas = getMeta(new File(url+"/index.html"));
+            String[] metas = getMeta(new File(arg.getProjectFolder() + "/index.html"));
             rss.append("  <title>");
             rss.append("<![CDATA[");
-            rss.append(getTitle(new File(url+"/index.html")));
+            rss.append(getTitle(new File(arg.getProjectFolder() + "/index.html")));
             rss.append("]]>");
             rss.append("</title>\n");
             rss.append("  <description>");
@@ -97,23 +102,25 @@ class Main {
             rss.append("]]>");
             rss.append("</description>\n");
             rss.append("  <link>");
-            rss.append(domain);
+            rss.append(arg.getDomain());
             rss.append("  </link>\n");
             rss.append("  <image>\n");
             rss.append("    <url>");
             rss.append(metas[1]);
             rss.append("</url>\n");
             rss.append("    <title>");
-            rss.append(getTitle(new File(url+"/index.html")));
+            rss.append(getTitle(new File(arg.getProjectFolder() + "/index.html")));
             rss.append("</title>\n");
             rss.append("    <link>");
-            rss.append(domain);
+            rss.append(arg.getDomain());
             rss.append("</link>\n");
-            rss.append("  </image>\n  <generator> RSS for Melvin Jones Repol </generator>\n");
+            rss.append("  </image>\n  <generator> RSS for ");
+            rss.append(arg.getPublisher());
+            rss.append(" </generator>\n");
             rss.append("  <lastBuildDate>");
             rss.append(format.format(new Date()));
             rss.append("</lastBuildDate>\n");
-            rss.append("  <link href=\"https://" + domain + "/rss.xml\"" + " rel=\"self\" type=\"application/rss+xml\"/>\n");
+            rss.append("  <link href=\"" + arg.getDomain() + arg.getOutputFile() + "\"" + " rel=\"self\" type=\"application/rss+xml\"/>\n");
             rss.append("  <language><![CDATA[ en ]]></language>\n");
             isHome = true;
         }
@@ -124,10 +131,10 @@ class Main {
             if (folder.isDirectory()) {
                 File hasIndex = new File(folder.getAbsolutePath() + "/index.html");
                 if (hasIndex.isFile()) {
-                    System.out.println(format.format(hasIndex.lastModified()) + " | " + domain + hasIndex.getParentFile().getAbsolutePath().replace(url, ""));
+                    System.out.println(format.format(hasIndex.lastModified()) + " | " + arg.getDomain() + hasIndex.getParentFile().getAbsolutePath().replace(arg.getProjectFolder(), ""));
                     String[] metas = getMeta(new File(hasIndex.getParentFile().getAbsolutePath() + "/index.html"));
-                     items.add(new Item("<![CDATA[" + getTitle(new File(hasIndex.getParentFile().getAbsolutePath() + "/index.html")) + "]]>", "<![CDATA[" + metas[0] + "]]>", domain + hasIndex.getParentFile().getAbsolutePath().replace(url, ""), metas[1]));
-                     find(new File (file.getAbsolutePath() + "/" + str), domain);
+                     items.add(new Item("<![CDATA[" + getTitle(new File(hasIndex.getParentFile().getAbsolutePath() + "/index.html")) + "]]>", "<![CDATA[" + metas[0] + "]]>", arg.getDomain() + hasIndex.getParentFile().getAbsolutePath().replace(arg.getProjectFolder(), ""), metas[1]));
+                     find(new File (file.getAbsolutePath() + "/" + str), arg.getDomain());
                 }
             }
         
@@ -171,18 +178,29 @@ class Main {
         }
         return null;
     }
-}
 
-class Item {
-    public String title;
-    public String description;
-    public String link;
-    public String medium_url;
+    public static Arg resolveArguments(String[] args) {
+        Arg arg = new Arg();
+        for (int i = 0; i < args.length; i++) {
+            switch(args[i]) {
+                case "--domain":
+                    arg.setDomain(args[i + 1]);
+                break;
+                case "--publisher":
+                    arg.setPublisher(args[i + 1]);
+                break;
+                case "--projectFolder":
+                    arg.setProjectFolder(args[i + 1]);
+                break;
+            }
+        }
 
-    public Item(String title, String description, String link, String medium_url) {
-        this.title = title;
-        this.description = description;
-        this.link = link;
-        this.medium_url = medium_url;
+        if (arg.getDomain() == null) {
+            throw new RuntimeException("Undefined --domain value");
+        }
+        if (arg.getPublisher() == null) {
+            throw new RuntimeException("Undefined --publisher value");
+        }
+        return arg;
     }
 }

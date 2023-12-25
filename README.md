@@ -1,16 +1,24 @@
 # RSS-Generator
 
-Automatically generate rss.xml for your site.
+Automatically generate RSS for static websites.
 
 ## Requirements
-- https://jsoup.org/download
-- https://jar-download.com/artifacts/org.json
-
-## Todo
-Replace all necessary data such as file locations and domain name.
+- maven
+- Java 8
 
 ## Compile
-javac RSS.java
+```
+mvn compile assembly:single
+```
 
 ## Run
-java RSS
+```
+java -cp target/RSS-Generator-1.0-SNAPSHOT-jar-with-dependencies.jar com.mrepol742.rssgenerator.App --domain https://mrepol742.github.io/ --publisher "Melvin Jones Repol"
+```
+
+## Options
+```
+--domain 
+--publisher
+--projectFolder [optional]
+```

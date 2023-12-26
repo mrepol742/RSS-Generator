@@ -52,7 +52,7 @@ public class App {
         }
         rss.append(footer);
         Files.createDirectories(Paths.get(arg.getProjectFolder() + "/rss"));
-        if (write(new File(arg.getProjectFolder() + "rss/index.xml"), rss.toString(), false)) {
+        if (write(new File(arg.getProjectFolder() + "/rss/index.xml"), rss.toString(), false)) {
             System.out.println("\nRSS generated for " + arg.getDomain());
         } else {
             System.out.println("\nFailed to generate rss.");
@@ -131,9 +131,9 @@ public class App {
             if (folder.isDirectory()) {
                 File hasIndex = new File(folder.getAbsolutePath() + "/index.html");
                 if (hasIndex.isFile()) {
-                    System.out.println(format.format(hasIndex.lastModified()) + " | " + arg.getDomain() + hasIndex.getParentFile().getAbsolutePath().replace(arg.getProjectFolder(), ""));
+                    System.out.println(format.format(hasIndex.lastModified()) + " | " + (arg.getDomain() + hasIndex.getParentFile().getAbsolutePath().replace(arg.getProjectFolder(), "")).replace("//", "/"));
                     String[] metas = getMeta(new File(hasIndex.getParentFile().getAbsolutePath() + "/index.html"));
-                     items.add(new Item("<![CDATA[" + getTitle(new File(hasIndex.getParentFile().getAbsolutePath() + "/index.html")) + "]]>", "<![CDATA[" + metas[0] + "]]>", arg.getDomain() + hasIndex.getParentFile().getAbsolutePath().replace(arg.getProjectFolder(), ""), metas[1]));
+                     items.add(new Item("<![CDATA[" + getTitle(new File(hasIndex.getParentFile().getAbsolutePath() + "/index.html")) + "]]>", "<![CDATA[" + metas[0] + "]]>", (arg.getDomain() + hasIndex.getParentFile().getAbsolutePath().replace(arg.getProjectFolder(), "")).replace("//", "/"), metas[1]));
                      find(new File (file.getAbsolutePath() + "/" + str), arg.getDomain());
                 }
             }

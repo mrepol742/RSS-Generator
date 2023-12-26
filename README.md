@@ -13,7 +13,7 @@ mvn compile assembly:single
 
 ## Run
 ```
-java -cp target/RSS-Generator-1.0-SNAPSHOT-jar-with-dependencies.jar com.mrepol742.rssgenerator.App --domain https://mrepol742.github.io/ --publisher "Melvin Jones Repol"
+java -cp target/RSS-Generator-1.0-jar-with-dependencies.jar com.mrepol742.rssgenerator.App --domain https://mrepol742.github.io/ --publisher "Melvin Jones Repol"
 ```
 
 ## Options

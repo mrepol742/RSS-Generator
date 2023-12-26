@@ -21,12 +21,8 @@ jobs:
         java-version: '17'
         distribution: 'zulu'
         cache: maven
-        server-id: github
-        settings-path: ${{ github.workspace }}
-    - name: Build with Maven
-      run: mvn compile assembly:single
 
     - name: Publish to GitHub Packages Apache Maven
-      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
+      run: mvn assembly:single deploy
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

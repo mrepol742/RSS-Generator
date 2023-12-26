@@ -52,7 +52,7 @@ public class App {
         }
         rss.append(footer);
         Files.createDirectories(Paths.get(arg.getProjectFolder() + "/rss"));
-        if (write(new File(arg.getProjectFolder() + "/rss/index.xml"), rss.toString(), false)) {
+        if (write(new File(arg.getProjectFolder() + "rss/index.xml"), rss.toString(), false)) {
             System.out.println("\nRSS generated for " + arg.getDomain());
         } else {
             System.out.println("\nFailed to generate rss.");

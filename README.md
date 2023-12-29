@@ -2,6 +2,9 @@
 
 Automatically generate RSS for static websites.
 
+![](demo1.png)
+![](demo2.png)
+
 ## Requirements
 - maven
 - Java 8
